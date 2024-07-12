@@ -2,46 +2,85 @@
 <html>
 <head>
     <title>Données du compte CANAL PLUS RDC</title>
-    <script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #f5f5f5;
-            padding: 30px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             margin: 0;
+            padding: 0;
         }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
         h1 {
             text-align: center;
-            color: #4CAF50;
-            margin-bottom: 30px;
+            color: #333;
+            margin-bottom: 20px;
         }
+        
+       
+        
         button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
+            background-color: #007bff;
+            color: #fff;
             border: none;
-            border-radius: 4px;
+            padding: 10px 20px;
+            margin: 0 10px;
             cursor: pointer;
+            border-radius: 4px;
             font-size: 16px;
-            transition: background-color 0.3s ease;
         }
-        .btn:hover {
-            background-color: #45a049;
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        #output {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
         }
     </style>
-</head>
 <body>
     <h1>Données du compte CANAL PLUS RDC</h1>
-    <button onclick="login()">Connexion</button>
-    <button onclick="getVehicles()">Afficher les véhicules triés</button>
-    <button onclick="getMarkers()">Afficher les marqueurs</button>
-    <button onclick="updateMarker()">Mettre à jour un marqueur</button>
+    <button id="loginBtn">Connexion</button>
+    <button id="vehiclesBtn">Afficher les véhicules triés</button>
+    <button id="markersBtn">Afficher les marqueurs</button>
+    <button id="updateMarkerBtn">Mettre à jour un marqueur</button>
     <div id="output"></div>
-
 
     <script>
         var baseUrl = "https://fleet.securysat.com/json/";
         var sessionId = null;
+
+        $("#loginBtn").click(function() {
+            login();
+        });
+
+        $("#vehiclesBtn").click(function() {
+            getVehicles();
+        });
+
+        $("#markersBtn").click(function() {
+            getMarkers();
+        });
+
+        $("#updateMarkerBtn").click(function() {
+            updateMarker();
+        });
 
         function login() {
             $.ajax({
@@ -67,59 +106,72 @@
         }
 
         function getVehicles() {
-            $.ajax({
-                url: baseUrl + "getVehicles",
-                type: 'POST',
-                data: JSON.stringify({'sessionId': sessionId}),
-                contentType: 'application/json',
-                dataType: 'json',
-                success: function(data) {
-                    console.log("Récupération des véhicules réussie");
-                    $('#output').append("<p>Véhicules :</p>");
-                    $('#output').append(JSON.stringify(data));
-                },
-                error: function(data) {
-                    console.log("Erreur lors de la récupération des véhicules");
-                    $('#output').append("<p>Erreur lors de la récupération des véhicules.</p>");
-                }
-            });
+            if (sessionId) {
+                $.ajax({
+                    url: baseUrl + "getVehicles",
+                    type: 'POST',
+                    data: JSON.stringify({'sessionId': sessionId}),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log("Récupération des véhicules réussie");
+                        $('#output').append("<h2>Véhicules :</h2>");
+                        $('#output').append("<pre>" + JSON.stringify(data, null, 2) + "</pre>");
+                    },
+                    error: function(data) {
+                        console.log("Erreur lors de la récupération des véhicules");
+                        $('#output').append("<p>Erreur lors de la récupération des véhicules.</p>");
+                    }
+                });
+            } else {
+                $('#output').append("<p>Vous devez d'abord vous connecter.</p>");
+            }
         }
 
         function getMarkers() {
-            $.ajax({
-                url: baseUrl + "getMarkers",
-                type: 'POST',
-                data: JSON.stringify({'sessionId': sessionId}),
-                contentType: 'application/json',
-                dataType: 'json',
-                success: function(data) {
-                    console.log("Récupération des marqueurs réussie");
-                    $('#output').append("<p>Marqueurs :</p>");
-                    $('#output').append(JSON.stringify(data));
-                },
-                error: function(data) {
-                    console.log("Erreur lors de la récupération des marqueurs");
-                    $('#output').append("<p>Erreur lors de la récupération des marqueurs.</p>");
-                }
-            });
+            if (sessionId) {
+                $.ajax({
+                    url: baseUrl + "getMarkers",
+                    type: 'POST',
+                    data: JSON.stringify({'sessionId': sessionId}),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log("Récupération des marqueurs réussie");
+                        $('#output').append("<h2>Marqueurs :</h2>");
+                        $('#output').append("<pre>" + JSON.stringify(data, null, 2) + "</pre>");
+                    },
+                    error: function(data) {
+                        console.log("Erreur lors de la récupération des marqueurs");
+                        $('#output').append("<p>Erreur lors de la récupération des marqueurs.</p>");
+                    }
+                });
+            } else {
+                $('#output').append("<p>Vous devez d'abord vous connecter.</p>");
+            }
         }
 
-        function updateMarker(sessionId, marker) {
-            $.ajax({
-                url: baseUrl + "updateMarker",
-                type: 'POST',
-                data: JSON.stringify({'sessionId': sessionId, 'marker': marker}),
-                contentType: 'application/json',
-                dataType: 'json',
-                success: function(data) {
-                    console.log("Mise à jour du marqueur réussie");
-                    $('#output').append("<p>Mise à jour du marqueur réussie.</p>");
-                },
-                error: function(data) {
-                    console.log("Erreur lors de la mise à jour du marqueur");
-                    $('#output').append("<p>Erreur lors de la mise à jour du marqueur.</p>");
-                }
-            });
+        function updateMarker() {
+            if (sessionId) {
+                var marker = prompt("Entrez les informations du marqueur à mettre à jour (sous forme de JSON):");
+                $.ajax({
+                    url: baseUrl + "updateMarker",
+                    type: 'POST',
+                    data: JSON.stringify({'sessionId': sessionId, 'marker': JSON.parse(marker)}),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log("Mise à jour du marqueur réussie");
+                        $('#output').append("<p>Mise à jour du marqueur réussie.</p>");
+                    },
+                    error: function(data) {
+                        console.log("Erreur lors de la mise à jour du marqueur");
+                        $('#output').append("<p>Erreur lors de la mise à jour du marqueur.</p>");
+                    }
+                });
+            } else {
+                $('#output').append("<p>Vous devez d'abord vous connecter.</p>");
+            }
         }
     </script>
 </body>
